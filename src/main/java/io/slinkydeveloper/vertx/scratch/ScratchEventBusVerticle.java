@@ -4,6 +4,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.ext.bridge.PermittedOptions;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.sockjs.BridgeOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 
@@ -24,34 +25,7 @@ public class ScratchEventBusVerticle extends AbstractVerticle {
 
         router.route("/eventbus/*").handler(sockJSHandler);
 
-        AtomicInteger i = new AtomicInteger();
-        vertx.setPeriodic(1000, l ->
-            vertx.eventBus().request("scratch.ping", "Ping " + i.getAndIncrement(), ar -> {
-                if (ar.failed()) {
-                    System.out.println(ar.cause().getMessage(   ));
-                    ar.cause().printStackTrace();
-                } else {
-                    System.out.println("Message from " + ar.result().address());
-                    System.out.println(ar.result().body());
-                }
-            })
-        );
-        vertx.setPeriodic(1000, l ->
-                vertx.eventBus().request("scratch.rotate", 90, ar -> {
-                    if (ar.failed()) {
-                        System.out.println(ar.cause().getMessage(   ));
-                        ar.cause().printStackTrace();
-                    } else {
-                        System.out.println("Message from " + ar.result().address());
-                        System.out.println(ar.result().body());
-                    }
-                })
-        );
-
-        vertx.eventBus().consumer("scratch.test").handler(message -> {
-            System.out.println("Message from " + message.address());
-            System.out.println(message.body());
-        });
+        router.route().handler(StaticHandler.create());
 
         vertx
             .createHttpServer()
